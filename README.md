@@ -6,6 +6,18 @@ A relational database schema for a gym management system, built in MySQL. It mod
 
 - MySQL
 
+## Getting Started
+
+The repo has two SQL files:
+
+- `gymdb_setup.sql` builds the whole database (tables, sample data, views, stored procedure, and staff user). It drops and recreates `gymdb` each time, so it is safe to re-run.
+- `gymdb_scratch.sql` holds example queries for exploring the data.
+
+```bash
+mysql -u root -p < gymdb_setup.sql
+mysql -u root -p < gymdb_scratch.sql
+```
+
 ## Schema Overview
 
 | Table | Description | Key Relationships |
@@ -36,11 +48,11 @@ CALL memberpackage('K1');
 
 ## Access Control
 
-A restricted MySQL user (`gymstaff`) is created with `SELECT`-only privileges on the `member` table, separating day-to-day staff access from full administrative access to the database.
+A restricted MySQL user (`gymstaff`) is created with `SELECT`-only privileges on the `member` table, separating day-to-day staff access from full administrative access to the database. The password in the script is a placeholder; set your own before using it anywhere beyond a demo.
 
 ```sql
-CREATE USER 'gymstaff'@'localhost' IDENTIFIED BY 'securepass';
-GRANT SELECT ON member TO 'gymstaff'@'localhost';
+CREATE USER IF NOT EXISTS 'gymstaff'@'localhost' IDENTIFIED BY 'change_me';
+GRANT SELECT ON gymdb.member TO 'gymstaff'@'localhost';
 ```
 
 ## Example Queries
@@ -60,4 +72,4 @@ CALL memberpackage('K1');
 
 - Store `date_ofbirth`, `startdate`/`enddate`, and `price` as proper `DATE`/`DECIMAL` types instead of `VARCHAR`, so date math and amount totals don't rely on string comparisons.
 - Derive `gender` from a dedicated lookup or input field rather than the first digit of `memberID`, since that ties a business attribute to an identifier's formatting convention.
-- Use a non-destructive setup script (so running it doesn't drop tables immediately after creating and populating them), separating schema creation from the exploratory `SELECT`/`DROP` statements used during development.
+- Add `ON DELETE`/`ON UPDATE` rules to the foreign keys, so removing a member or trainer has defined behavior instead of being blocked.
